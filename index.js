@@ -1,18 +1,33 @@
 import { GoogleGenAI } from "@google/genai";
 import 'dotenv/config';
 import pkg from "node-banner";
+import readline from "readline"
 
 const showBanner = pkg.showBanner || pkg.default || pkg;
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
-async function main() {
-    await showBanner('The title', 'Just testing duhh');
-    const response = await ai.models.generateContent({
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+})
+
+async function main(question) {
+    await showBanner('Ask Weather Dept.', 'Your trustworthy weather companion');
+
+    const feedback = await new Promise((resolve) => {
+        const prompt = question || 'Whats your question: ';
+        rl.question(prompt, (answer) => {
+            resolve(answer.trim());
+        });
+    });
+
+     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: "Explain how AI works in short",
+        contents: feedback,
     });
     console.log(response.text);
+    rl.close();
 }
 
 main();
